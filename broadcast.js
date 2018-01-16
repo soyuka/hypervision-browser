@@ -52,13 +52,14 @@ function broadcast (state, emit) {
         emit('broadcast:key:set', key)
 
         var hub = signalhub(discoveryKey, config.signalhub)
-        var sw = swarm(hub)
-        sw.on('peer', function (peer, id) {
+        swarm(hub).on('peer', function (peer, id) {
+          console.log('broadcast to peer')
           pump(peer, feed.replicate({ live: true, encrypt: false }), peer)
         })
       })
 
-      var mediaStream = pump(mediaRecorder, cluster())
+      var mediaStream = cluster()
+      pump(mediaRecorder, mediaStream)
       mediaStream.on('data', function (data) {
         console.log('appending to broadcast:', data)
         feed.append(data)

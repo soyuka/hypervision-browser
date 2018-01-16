@@ -1,3 +1,3 @@
 module.exports = {
-  signalhub: ['wss://signalhubws-bpyimaismm.now.sh']
+  signalhub: ['wss://soyuka.me/signalhub']
 }

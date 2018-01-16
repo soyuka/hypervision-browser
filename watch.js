@@ -15,7 +15,7 @@ function watch (state, emit) {
   return html`
     <div>
       <div style="margin-bottom: 12px">
-        <video id="player" controls autoplay></video>
+        <video id="player" controls></video>
       </div>
 
       <div style="margin-bottom: 12px">
@@ -43,36 +43,47 @@ function watch (state, emit) {
     var hash = document.getElementById('key-input').value
     var feed = hypercore(ram, hash, {sparse: true})
     feed.on('ready', function () {
-      console.log('feed ready')
-
       feed.download({ linear: true })
-      console.log('downloading feed')
 
       var key = feed.discoveryKey.toString('hex')
       var hub = signalhub(key, config.signalhub)
-      var sw = swarm(hub)
-      console.log('connecting to swarm')
-
-      sw.on('peer', function (peer, id) {
-        console.log('new peer found:', id)
+      swarm(hub).on('peer', function (peer, id) {
+        console.log('🙋 new peer found:', id)
         pump(peer, feed.replicate({ live: true, download: true, encrypt: false }), peer)
       })
 
       var block = 0
+      var queue = []
+
       getBlock(function () {
         sourceBuffer.addEventListener('updateend', function () {
-          getBlock()
+          if (queue.length > 0 && !sourceBuffer.updating) {
+
+            var buffer = queue.shift()
+
+            console.log('📺 appending block ' + buffer.block + ' from queue')
+            sourceBuffer.appendBuffer(buffer.buffer)
+          }
         })
       })
 
       function getBlock (cb) {
-        console.log('getting block', block)
         feed.get(block, function (err, data) {
-          console.log('got block ' + block, data)
-          sourceBuffer.appendBuffer(data.buffer)
-          block++
+          if (err) {
+            console.error(err)
+          }
 
-          if (cb) return cb()
+          if (sourceBuffer.updating || queue.length > 0) {
+            console.log('📚 pushing block ' + block + ' to queue')
+            queue.push({block: block, buffer: data.buffer})
+          } else {
+            console.log('📺 appending block ' + block)
+            sourceBuffer.appendBuffer(data.buffer)
+          }
+
+          block++
+          if (cb) cb()
+          return getBlock()
         })
       }
     })

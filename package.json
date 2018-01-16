@@ -13,11 +13,11 @@
     "getusermedia": "^2.0.1",
     "hypercore": "^6.12.0",
     "media-recorder-stream": "^2.1.1",
-    "pump": "^1.0.2",
+    "pump": "^2.0.0",
     "random-access-memory": "^2.4.0",
     "signalhubws": "^1.0.2",
     "webm-cluster-stream": "^1.0.0",
-    "webrtc-swarm": "^2.9.0"
+    "webrtc-swarm": "github:soyuka/webrtc-swarm#master"
   },
   "devDependencies": {
     "bankai": "^8.1.0"

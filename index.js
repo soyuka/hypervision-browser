@@ -1,4 +1,6 @@
 var choo = require('choo')
+var swarm = require('webrtc-swarm')
+var signalhubws = require('signalhubws')
 var html = require('choo/html')
 
 var app = choo()
@@ -30,3 +32,16 @@ function home (state, emit) {
     </div>
   `
 }
+
+var hub = signalhubws('test', ['wss://soyuka.me/signalhub'])
+var sw = swarm(hub)
+
+sw.on('peer', function (peer, id) {
+  console.log('connected to a new peer:', id)
+  console.log('total peers:', sw.peers.length)
+})
+
+sw.on('disconnect', function (peer, id) {
+  console.log('disconnected from a peer:', id)
+  console.log('total peers:', sw.peers.length)
+})
